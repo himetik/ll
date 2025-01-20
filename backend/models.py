@@ -1,10 +1,5 @@
-from pydantic import BaseModel
-from typing import Any
+from pydantic import BaseModel, HttpUrl
 
 
-class JsonData(BaseModel):
-    data: Any
-
-
-class YamlData(BaseModel):
-    data: str
+class LinkRequest(BaseModel):
+    url: HttpUrl
