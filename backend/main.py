@@ -1,19 +1,21 @@
 from fastapi import FastAPI, HTTPException
 import httpx
-from backend.models import LinkRequest
 
 
 app = FastAPI()
 
 
-@app.post("/check-link")
-async def check_link(link: LinkRequest):
+@app.get("/check")
+async def check_server(url: str):
     try:
-        url_str = str(link.url)
         async with httpx.AsyncClient() as client:
-            response = await client.get(url_str, timeout=10)
-            return {"url": url_str, "status": response.status_code}
-    except httpx.RequestError as e:
-        raise HTTPException(status_code=400, detail=f"Error accessing the URL: {e}")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Internal server error: {e}")
+            response = await client.get(url, timeout=6)
+
+        if response.status_code < 400:
+            return {"status": "up", "code": response.status_code}
+        else:
+            return {"status": "down", "code": response.status_code}
+    except httpx.RequestError as error:
+        return {"status": "down", "error": str(error)}
+    except Exception as error:
+        raise HTTPException(status_code=500, detail=f"Internal error: {str(error)}")
